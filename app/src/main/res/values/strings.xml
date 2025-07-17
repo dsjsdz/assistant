@@ -71,4 +71,7 @@
   <string name="read_board_hardware_version_success">读取硬件配置成功, 软件版本号: %1$s</string>
   <string name="read_io_status_fail">读取驱动板输入 IO 状态失败</string>
   <string name="read_io_status_success">读取驱动板输入 IO 状态成功\n(值：0—无效，1—有效) \n\n弹簧电机反馈(0~9): %1$d, %2$d, %2$d, %3$d, %4$d, %5$d, %6$d, %7$d, %8$d, %9$d, %10$d \n掉货检测口状态: %11$d \n预留输入口状态: %12$d \n按钮状态: %13$d</string>
+  <string name="btn_temperature_and_humidity">获取温湿度</string>
+  <string name="query_temperature_humidity_success">获取温湿度成功，温度: %1$s, 湿度: %2$s</string>
+  <string name="query_temperature_humidity_fail">获取温湿度失败</string>
 </resources>
