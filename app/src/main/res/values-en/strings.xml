@@ -71,4 +71,7 @@
   <string name="read_board_hardware_version_success">Read Hardware Config Success, Software Version: %1$s</string>
   <string name="read_io_status_fail">Read Board Input IO Status Fail</string>
   <string name="read_io_status_success">Read Board Input IO Status Success\n(Value：0—Invalid，1—Valid) \n\nSpring motor feedback(0~9): %1$d, %2$d, %2$d, %3$d, %4$d, %5$d, %6$d, %7$d, %8$d, %9$d, %10$d \nDrop detection status: %11$d \nReserved input port status: %12$d \nButton status: %13$d</string>
+  <string name="btn_temperature_and_humidity">Temperature &amp; Humidity</string>
+  <string name="query_temperature_humidity_success">Query Success，Temperature: %1$s, Humidity: %2$s</string>
+  <string name="query_temperature_humidity_fail">Query Temperature and Humidity fail</string>
 </resources>

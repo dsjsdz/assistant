@@ -1,5 +1,15 @@
 package com.awish.assistant
 
+//import cc.uling.usdk.USDK
+//import cc.uling.usdk.board.wz.para.BSReplyPara
+//import cc.uling.usdk.board.wz.para.HCReplyPara
+//import cc.uling.usdk.board.wz.para.IOReplyPara
+//import cc.uling.usdk.board.wz.para.ResetReplyPara
+//import cc.uling.usdk.board.wz.para.SReplyPara
+//import cc.uling.usdk.board.wz.para.SSReplyPara
+//import cc.uling.usdk.constants.CodeUtil
+//import cc.uling.usdk.constants.ErrorConst
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,15 +63,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import cc.uling.usdk.USDK
-import cc.uling.usdk.board.wz.para.BSReplyPara
-import cc.uling.usdk.board.wz.para.HCReplyPara
-import cc.uling.usdk.board.wz.para.IOReplyPara
-import cc.uling.usdk.board.wz.para.ResetReplyPara
-import cc.uling.usdk.board.wz.para.SReplyPara
-import cc.uling.usdk.board.wz.para.SSReplyPara
-import cc.uling.usdk.constants.CodeUtil
-import cc.uling.usdk.constants.ErrorConst
+import com.awish.assistant.drivers.BSRequestPara
+import com.awish.assistant.drivers.FloorType
+import com.awish.assistant.drivers.M2301
+import com.awish.assistant.drivers.SReplyPara
+import com.awish.assistant.err.ErrorCode
+import com.awish.assistant.err.RunStatus
+import com.awish.assistant.modbus.ModbusManager
 import com.awish.assistant.ui.components.AddrSelectorDialog
 import com.awish.assistant.ui.components.ChannelSelectorDialog
 import com.awish.assistant.ui.components.FloorTypeSelectorDialog
@@ -74,6 +82,9 @@ import com.awish.assistant.ui.templates.LogLevel
 import com.awish.assistant.ui.templates.Logger
 import com.awish.assistant.viewmodel.FloorTypeViewModel
 import com.awish.assistant.viewmodel.SerialPortViewModel
+import com.licheedev.modbus4android.ModbusCallback
+import com.licheedev.modbus4android.param.SerialParam
+import com.serotonin.modbus4j.ModbusMaster
 import kotlinx.coroutines.launch
 
 data class Option(
@@ -92,7 +103,7 @@ fun Welcome(navController: NavHostController) {
   var option by remember {
     mutableStateOf(
       Option(
-        commid = "/dev/ttyS0",
+        commid = "/dev/ttyS1",
         addr = 1,
         isDc = false,
         isLp = false,
@@ -102,14 +113,26 @@ fun Welcome(navController: NavHostController) {
       )
     )
   }
-  var board by remember { mutableStateOf(USDK.getInstance().create(option.commid)) }
+//  var board by remember { mutableStateOf(USDK.getInstance().create(option.commid)) }
 
   val context = LocalContext.current
+
+  val modbusManager: ModbusManager by remember {
+    mutableStateOf(ModbusManager.get())
+  }
+  modbusManager.apply {
+    this.closeModbusMaster()
+  }
+
+  var driver: M2301? by remember {
+    mutableStateOf(null)
+  }
+
   var visibleOfFloorTypeModel by remember { mutableStateOf(false) }
   var visibleOfAddrModel by remember { mutableStateOf(false) }
   var visibleOfChannelModel by remember { mutableStateOf(false) }
   var visibleOfSerialPortModel by remember { mutableStateOf(false) }
-  var isLoading by remember { mutableStateOf(false) }
+  val isLoading by remember { mutableStateOf(false) }
 
   val ftvm: FloorTypeViewModel = hiltViewModel()
   val spvm: SerialPortViewModel = hiltViewModel()
@@ -147,11 +170,41 @@ fun Welcome(navController: NavHostController) {
         )
         HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
         NavigationDrawerItem(
+          label = { Text("MDB230x 板卡") },
+          selected = false,
+          onClick = {
+            scope.launch { drawerState.close() }
+            expanded = false
+            modbusManager.apply {
+              this.closeModbusMaster()
+              option.copy(isOpened = false)
+            }
+            navController.navigate("mdb230x")
+          }
+        )
+        NavigationDrawerItem(
+          label = { Text("W50x 称重售卖机") },
+          selected = false,
+          onClick = {
+            scope.launch { drawerState.close() }
+            expanded = false
+            modbusManager.apply {
+              this.closeModbusMaster()
+              option.copy(isOpened = false)
+            }
+            navController.navigate("w50x")
+          }
+        )
+        NavigationDrawerItem(
           label = { Text(stringResource(id = R.string.nav_about)) },
           selected = false,
           onClick = {
             scope.launch { drawerState.close() }
             expanded = false
+            modbusManager.apply {
+              this.closeModbusMaster()
+              option.copy(isOpened = false)
+            }
             navController.navigate("about")
           }
         )
@@ -200,6 +253,10 @@ fun Welcome(navController: NavHostController) {
                 text = { Text(text = stringResource(id = R.string.nav_about)) },
                 onClick = {
                   expanded = false
+                  modbusManager.apply {
+                    this.closeModbusMaster()
+                    option.copy(isOpened = false)
+                  }
                   navController.navigate("about")
                 }
               )
@@ -259,57 +316,61 @@ fun Welcome(navController: NavHostController) {
             }
             Button(
               onClick = {
-                if (board.EF_Opened()) {
-                  board.EF_CloseDev()
-                }
-                board = USDK.getInstance().create(option.commid)
-                isLoading = true
-                val resp = board.EF_OpenDev(option.commid, 9600)
-                if (resp != ErrorConst.MDB_ERR_NO_ERR) {
-                  logs.add(
-                    LogEntry.new(
-                      context.getString(R.string.open_serial_path_fail),
-                      LogLevel.DANGER
-                    )
-                  )
-                  return@Button
-                }
-
-                HCReplyPara(option.addr).apply {
-                  board.ReadHardwareConfig(this)
-                }.apply {
-                  if (this.isOK) {
-                    logs.add(
-                      LogEntry.new(
-                        context.getString(
-                          R.string.open_serial_path_success, option.commid
-                        ), LogLevel.SUCCESS
-                      )
-                    )
-                    option = option.copy(isOpened = board.EF_Opened())
-                    logs.add(
-                      LogEntry.new(
-                        context.getString(
-                          R.string.read_config_success, this.row, this.column, this.version
-                        ),
-                        LogLevel.SUCCESS
-                      )
-                    )
-                  } else {
-                    if (board.EF_Opened()) {
-                      board.EF_CloseDev()
-                      option = option.copy(isOpened = false)
+                val serialParam = SerialParam.create(option.commid, 9600)
+                  .setDataBits(8) // 数据位
+                  .setParity(0) // 奇偶校验
+                  .setStopBits(1) // 停止位
+                  .setTimeout(2000) // 超时2s
+                  .setRetries(0) // 重试次数
+                modbusManager.init(serialParam, object : ModbusCallback<ModbusMaster> {
+                  override fun onSuccess(t: ModbusMaster?) {
+                    driver = M2301(ModbusManager.get())
+                    driver.apply {
+                      this?.readHardwareVersion(option.addr) { result ->
+                        result.onSuccess { reply ->
+                          logs.add(
+                            LogEntry.new(
+                              context.getString(
+                                R.string.open_serial_path_success, option.commid
+                              ), LogLevel.SUCCESS
+                            )
+                          )
+                          option = option.copy(isOpened = true)
+                          logs.add(
+                            LogEntry.new(
+                              context.getString(
+                                R.string.read_config_success,
+                                reply.row,
+                                reply.column,
+                                reply.version
+                              ),
+                              LogLevel.SUCCESS
+                            )
+                          )
+                        }.onFailure { e ->
+                          Log.e("Modbus", "读取硬件版本失败: ${e.message}")
+                          logs.add(
+                            LogEntry.new(
+                              context.getString(R.string.open_serial_path_fail) + ", error: ${e.message}",
+                              LogLevel.DANGER
+                            )
+                          )
+                        }
+                      }
                     }
+                  }
+
+                  override fun onFailure(tr: Throwable?) {
                     logs.add(
                       LogEntry.new(
-                        context.getString(
-                          R.string.open_serial_path_fail_check
-                        ), LogLevel.DANGER
+                        context.getString(R.string.open_serial_path_fail_check),
+                        LogLevel.DANGER
                       )
                     )
                   }
-                  isLoading = false
-                }
+
+                  override fun onFinally() {}
+                })
               },
             ) {
               Text(stringResource(R.string.btn_open_serial))
@@ -317,32 +378,16 @@ fun Welcome(navController: NavHostController) {
             if (option.isOpened) {
               Button(
                 onClick = {
-                  if (board.EF_Opened()) {
-                    val resp = board.EF_CloseDev()
-                    if (resp == 0) {
-                      option = option.copy(isOpened = false)
-                      logs.add(
-                        LogEntry.new(
-                          context.getString(R.string.close_serial_success, option.commid),
-                          LogLevel.SUCCESS
-                        )
-                      )
-                    } else {
-                      logs.add(
-                        LogEntry.new(
-                          context.getString(R.string.close_serial_fail),
-                          LogLevel.DANGER
-                        )
-                      )
-                    }
-                  } else {
-                    logs.add(
-                      LogEntry.new(
-                        context.getString(R.string.serial_not_open),
-                        LogLevel.DANGER
-                      )
-                    )
+                  modbusManager.apply {
+                    this.closeModbusMaster()
+                    option = option.copy(isOpened = false)
                   }
+                  logs.add(
+                    LogEntry.new(
+                      context.getString(R.string.close_serial_success, option.commid),
+                      LogLevel.SUCCESS
+                    )
+                  )
                 },
                 colors = ButtonDefaults.buttonColors(
                   containerColor = MaterialTheme.colorScheme.secondary
@@ -428,35 +473,33 @@ fun Welcome(navController: NavHostController) {
             Button(
               enabled = option.isOpened,
               onClick = {
-                IOReplyPara(option.addr).apply {
-                  board.GetIOStatus(this)
-                }.apply {
-                  if (this.isOK) {
+                driver?.getIOStatus(option.addr) { result ->
+                  result.onSuccess { reply ->
                     logs.add(
                       LogEntry.new(
                         context.getString(
                           R.string.read_io_status_success,
-                          this.io0,
-                          this.io1,
-                          this.io2,
-                          this.io3,
-                          this.io4,
-                          this.io5,
-                          this.io6,
-                          this.io7,
-                          this.io8,
-                          this.io9,
-                          this.io10,
-                          this.io11,
-                          this.io12
+                          reply.io0,
+                          reply.io1,
+                          reply.io2,
+                          reply.io3,
+                          reply.io4,
+                          reply.io5,
+                          reply.io6,
+                          reply.io7,
+                          reply.io8,
+                          reply.io9,
+                          reply.io10,
+                          reply.io11,
+                          reply.io12
                         ),
                         LogLevel.SUCCESS
                       )
                     )
-                  } else {
+                  }.onFailure { e ->
                     logs.add(
                       LogEntry.new(
-                        context.getString(R.string.read_io_status_fail),
+                        context.getString(R.string.read_io_status_fail) + ", error: ${e.message}",
                         LogLevel.DANGER
                       )
                     )
@@ -471,23 +514,21 @@ fun Welcome(navController: NavHostController) {
             Button(
               enabled = option.isOpened,
               onClick = {
-                HCReplyPara(option.addr).apply {
-                  board.ReadHardwareConfig(this)
-                }.apply {
-                  if (this.isOK) {
+                driver?.readHardwareVersion(option.addr) { result ->
+                  result.onSuccess { reply ->
                     logs.add(
                       LogEntry.new(
                         context.getString(
                           R.string.read_board_hardware_version_success,
-                          this.version
+                          reply.version
                         ),
                         LogLevel.SUCCESS
                       )
                     )
-                  } else {
+                  }.onFailure { e ->
                     logs.add(
                       LogEntry.new(
-                        context.getString(R.string.read_board_hardware_version_fail),
+                        context.getString(R.string.read_board_hardware_version_fail) + ", error: ${e.message}",
                         LogLevel.DANGER
                       )
                     )
@@ -562,10 +603,15 @@ fun Welcome(navController: NavHostController) {
               modifier = Modifier.weight(2f),
               enabled = option.isOpened,
               onClick = {
-                ResetReplyPara(option.addr).apply {
-                  board.ResetLift(this)
-                }.apply {
-                  if (!this.isOK) {
+                driver?.resetLift(option.addr) { result ->
+                  result.onSuccess { reply ->
+                    logs.add(
+                      LogEntry.new(
+                        context.getString(R.string.reset_lift_success),
+                        LogLevel.SUCCESS
+                      )
+                    )
+                  }.onFailure { e ->
                     logs.add(
                       LogEntry.new(
                         context.getString(R.string.reset_lift_fail),
@@ -574,12 +620,6 @@ fun Welcome(navController: NavHostController) {
                     )
                   }
                 }
-                logs.add(
-                  LogEntry.new(
-                    context.getString(R.string.reset_lift_success),
-                    LogLevel.SUCCESS
-                  )
-                )
               },
             ) {
               Text(stringResource(R.string.reset_lift))
@@ -688,23 +728,29 @@ fun Welcome(navController: NavHostController) {
             Button(
               enabled = option.isOpened,
               onClick = {
-                SReplyPara(
-                  option.addr,
-                  option.code!!,
-                  option.floorType!!,
-                  option.isDc,
-                  option.isLp
-                ).apply {
-                  board.Shipment(this)
-                }.apply {
-                  if (this.isOK) {
+                val floorType = when (option.floorType) {
+                  1 -> FloorType.SpringGMotor
+                  2 -> FloorType.Electromagnetic
+                  3 -> FloorType.Caterpillar
+                  else -> FloorType.SpringGMotor
+                }
+                driver?.runShipment(
+                  SReplyPara(
+                    option.addr,
+                    option.code!!,
+                    floorType,
+                    option.isDc,
+                    option.isLp
+                  )
+                ) { result ->
+                  result.onSuccess { reply ->
                     logs.add(
                       LogEntry.new(
                         context.getString(R.string.shipment_success),
                         LogLevel.SUCCESS
                       )
                     )
-                  } else {
+                  }.onFailure { e ->
                     logs.add(
                       LogEntry.new(
                         context.getString(R.string.shipment_fail),
@@ -722,37 +768,35 @@ fun Welcome(navController: NavHostController) {
             Button(
               enabled = option.isOpened,
               onClick = {
-                val para = SSReplyPara(option.addr).apply { board.GetShipmentStatus(this) }.apply {
-                  if (!this.isOK) {
+                driver?.readShipmentStatus(option.addr) { result ->
+                  result.onSuccess { reply ->
+                    val info = when (reply.runStatus) {
+                      0 -> LogLevel.INFO
+                      1 -> LogLevel.WARN
+                      2 -> LogLevel.SUCCESS
+                      else -> LogLevel.ERROR
+                    }
                     logs.add(
                       LogEntry.new(
                         context.getString(
-                          R.string.query_shipment_status_fail
+                          R.string.query_shipment_status_success,
+                          reply.runStatus,
+                          RunStatus.descriptionFor(reply.runStatus),
+                          reply.faultCode,
+                          ErrorCode.descriptionFor(reply.faultCode)
                         ),
+                        info
+                      )
+                    )
+                  }.onFailure { e ->
+                    logs.add(
+                      LogEntry.new(
+                        context.getString(R.string.query_shipment_status_fail),
                         LogLevel.DANGER
                       )
                     )
                   }
                 }
-
-                val info = when (para.runStatus) {
-                  0 -> LogLevel.INFO
-                  1 -> LogLevel.WARN
-                  2 -> LogLevel.SUCCESS
-                  else -> LogLevel.ERROR
-                }
-                logs.add(
-                  LogEntry.new(
-                    context.getString(
-                      R.string.query_shipment_status_success,
-                      para.runStatus,
-                      CodeUtil.getXYStatusMsg(para.runStatus),
-                      para.faultCode,
-                      CodeUtil.getFaultMsg(para.faultCode)
-                    ),
-                    info
-                  )
-                )
               },
               modifier = Modifier.weight(1f)
             ) {
@@ -765,23 +809,43 @@ fun Welcome(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
           ) {
-            Spacer(modifier = Modifier.weight(3f))
+            Spacer(modifier = Modifier.weight(2f))
             Button(
               onClick = {
-                if (!board.EF_Opened() && !option.isOpened) {
+                driver?.readTemperatureAndHumidity(option.addr) { result ->
+                  result.onSuccess { reply ->
+                    logs.add(
+                      LogEntry.new(
+                        context.getString(
+                          R.string.query_temperature_humidity_success,
+                          String.format("%.2f", reply.humidity / 10.0),
+                          String.format("%.2f", reply.temperature / 10.0)
+                        ),
+                        LogLevel.SUCCESS
+                      )
+                    )
+                  }.onFailure { e ->
+                    logs.add(
+                      LogEntry.new(
+                        context.getString(R.string.query_temperature_humidity_fail),
+                        LogLevel.DANGER
+                      )
+                    )
+                  }
+                }
+              },
+              modifier = Modifier.weight(1f),
+              enabled = option.isOpened
+            ) {
+              Text(stringResource(R.string.btn_temperature_and_humidity))
+            }
+
+            Button(
+              onClick = {
+                if (!option.isOpened) {
                   logs.add(
                     LogEntry.new(
                       context.getString(R.string.open_serial_first),
-                      LogLevel.DANGER
-                    )
-                  )
-                  return@Button
-                }
-
-                if (option.floorType != 2) {
-                  logs.add(
-                    LogEntry.new(
-                      context.getString(R.string.electromagnetic_first),
                       LogLevel.DANGER
                     )
                   )
@@ -794,34 +858,32 @@ fun Welcome(navController: NavHostController) {
                     LogLevel.INFO
                   )
                 )
-                val para =
-                  BSReplyPara(option.addr, option.code!!).apply { board.GetBoxStatus(this) }
-                    .apply {
-                      if (!this.isOK) {
-                        logs.add(
-                          LogEntry.new(
-                            context.getString(R.string.query_box_status_fail),
-                            LogLevel.DANGER
-                          )
-                        )
-                        return@Button
-                      }
-                    }
 
-                val info = when (para.status) {
-                  0 -> LogLevel.SUCCESS
-                  else -> LogLevel.ERROR
+                driver?.getBoxStatus(BSRequestPara(option.addr, option.code!!)) { result ->
+                  result.onSuccess { reply ->
+                    val info = when (reply.status) {
+                      0 -> LogLevel.SUCCESS
+                      else -> LogLevel.ERROR
+                    }
+                    logs.add(
+                      LogEntry.new(
+                        context.getString(
+                          R.string.query_box_status_success,
+                          reply.status,
+                          reply.code
+                        ),
+                        info
+                      )
+                    )
+                  }.onFailure { e ->
+                    logs.add(
+                      LogEntry.new(
+                        context.getString(R.string.query_box_status_fail),
+                        LogLevel.DANGER
+                      )
+                    )
+                  }
                 }
-                logs.add(
-                  LogEntry.new(
-                    context.getString(
-                      R.string.query_box_status_success,
-                      para.status,
-                      para.no
-                    ),
-                    info
-                  )
-                )
               },
               modifier = Modifier.weight(2f),
               enabled = option.floorType == 2

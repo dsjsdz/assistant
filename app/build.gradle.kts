@@ -25,17 +25,10 @@ android {
     minSdk = 24
     @Suppress("OldTargetApi") // 保留你原有注释用途
     targetSdk = 34
-    versionCode = 3
-    versionName = "1.1.1"
+    versionCode = 4
+    versionName = "1.2.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-  }
-
-  // config libs
-  sourceSets {
-    getByName("main") {
-      jniLibs.srcDirs("libs")
-    }
   }
 
   // signing configs
@@ -78,12 +71,10 @@ android {
 }
 
 dependencies {
-  // import custom jar of libs
-  implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
   // add gson
   implementation(libs.gson)
 
-  implementation("com.google.android.material:material:1.10.0")
+  implementation(libs.material)
 
   // 核心 Hilt 依赖
   implementation(libs.hilt.android)
@@ -113,4 +104,20 @@ dependencies {
   androidTestImplementation(libs.androidx.ui.test.junit4)
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
+
+  // https://github.com/licheedev/Modbus4Android
+  implementation("com.github.licheedev:Modbus4Android:3.0.0") {
+    exclude(group = "commons-logging", module = "commons-logging")
+  }
+
+  // rx全家桶
+  implementation(libs.rxjava)
+  implementation(libs.rxlifecycle.android)
+  implementation("com.trello.rxlifecycle2:rxlifecycle-components:2.1.0") {
+    exclude(group = "com.android.support", module = "support-compat")
+  }
+
+  // kotlin 协程
+  implementation(libs.jetbrains.kotlinx.coroutines.android)
+
 }
