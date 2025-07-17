@@ -31,13 +31,6 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  // config libs
-  sourceSets {
-    getByName("main") {
-      jniLibs.srcDirs("libs")
-    }
-  }
-
   // signing configs
   signingConfigs {
     create("release") {
@@ -78,8 +71,6 @@ android {
 }
 
 dependencies {
-  // import custom jar of libs
-  implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
   // add gson
   implementation(libs.gson)
 
@@ -113,4 +104,20 @@ dependencies {
   androidTestImplementation(libs.androidx.ui.test.junit4)
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
+
+  // https://github.com/licheedev/Modbus4Android
+  implementation("com.github.licheedev:Modbus4Android:3.0.0") {
+    exclude(group = "commons-logging", module = "commons-logging")
+  }
+
+  // rx全家桶
+  implementation(libs.rxjava)
+  implementation(libs.rxlifecycle.android)
+  implementation("com.trello.rxlifecycle2:rxlifecycle-components:2.1.0") {
+    exclude(group = "com.android.support", module = "support-compat")
+  }
+
+  // kotlin 协程
+  implementation(libs.jetbrains.kotlinx.coroutines.android)
+
 }
