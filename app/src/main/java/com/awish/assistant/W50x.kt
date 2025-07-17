@@ -125,7 +125,7 @@ fun W50x(navController: NavHostController) {
           IconButton(onClick = {
             modbusManager.apply {
               this.closeModbusMaster()
-              option.copy(isOpened = false)
+              option = option.copy(isOpened = false)
             }
             navController.popBackStack()
           }) {
@@ -714,7 +714,7 @@ fun W50x(navController: NavHostController) {
           Button(
             enabled = option.isOpened,
             onClick = {
-              driver?.zeroCalibration(option.addr, channelNumber=option.code!!) { result ->
+              driver?.zeroCalibration(option.addr, channelNumber = option.code!!) { result ->
                 result.onSuccess { reply ->
                   logs.add(
                     LogEntry.new(
@@ -735,6 +735,32 @@ fun W50x(navController: NavHostController) {
             modifier = Modifier.weight(1f)
           ) {
             Text("货道${option.code}去皮")
+          }
+
+          Button(
+            enabled = option.isOpened,
+            onClick = {
+              driver?.setCalibrationWeight(option.addr) { result ->
+                result.onSuccess { reply ->
+                  logs.add(
+                    LogEntry.new(
+                      "设置校准砝码重量: ${Gson().toJson(reply)}",
+                      LogLevel.SUCCESS
+                    )
+                  )
+                }.onFailure { e ->
+                  logs.add(
+                    LogEntry.new(
+                      "设置校准砝码重量 error: ${e.message}",
+                      LogLevel.DANGER
+                    )
+                  )
+                }
+              }
+            },
+            modifier = Modifier.weight(1f)
+          ) {
+            Text("重置砝码称重1KG")
           }
         }
 
@@ -776,32 +802,6 @@ fun W50x(navController: NavHostController) {
           Button(
             enabled = option.isOpened,
             onClick = {
-              driver?.setCalibrationWeight(option.addr) { result ->
-                result.onSuccess { reply ->
-                  logs.add(
-                    LogEntry.new(
-                      "设置校准砝码重量: ${Gson().toJson(reply)}",
-                      LogLevel.SUCCESS
-                    )
-                  )
-                }.onFailure { e ->
-                  logs.add(
-                    LogEntry.new(
-                      "设置校准砝码重量 error: ${e.message}",
-                      LogLevel.DANGER
-                    )
-                  )
-                }
-              }
-            },
-            modifier = Modifier.weight(1f)
-          ) {
-            Text("设置校准砝码重量1000g")
-          }
-
-          Button(
-            enabled = option.isOpened,
-            onClick = {
               val para = WeighRequestPara(addr = option.addr, channelCount = option.code!!)
               driver?.readWeights(para) { result ->
                 result.onSuccess { reply ->
@@ -824,6 +824,31 @@ fun W50x(navController: NavHostController) {
             modifier = Modifier.weight(1f)
           ) {
             Text("读取${option.code}称重数据")
+          }
+          Button(
+            enabled = option.isOpened,
+            onClick = {
+              driver?.readMultiParameters(option.addr, channelCount = count) { result ->
+                result.onSuccess { reply ->
+                  logs.add(
+                    LogEntry.new(
+                      "多参数一次性读取: ${Gson().toJson(reply)}",
+                      LogLevel.SUCCESS
+                    )
+                  )
+                }.onFailure { e ->
+                  logs.add(
+                    LogEntry.new(
+                      "多参数一次性读取 error: ${e.message}",
+                      LogLevel.DANGER
+                    )
+                  )
+                }
+              }
+            },
+            modifier = Modifier.weight(1f)
+          ) {
+            Text("多参数一次性读取")
           }
         }
 
@@ -881,37 +906,6 @@ fun W50x(navController: NavHostController) {
             modifier = Modifier.weight(1f)
           ) {
             Text("查询称重传感器状态(32位)")
-          }
-        }
-
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-          Button(
-            enabled = option.isOpened,
-            onClick = {
-              driver?.readMultiParameters(option.addr, channelCount = count) { result ->
-                result.onSuccess { reply ->
-                  logs.add(
-                    LogEntry.new(
-                      "多参数一次性读取: ${Gson().toJson(reply)}",
-                      LogLevel.SUCCESS
-                    )
-                  )
-                }.onFailure { e ->
-                  logs.add(
-                    LogEntry.new(
-                      "多参数一次性读取 error: ${e.message}",
-                      LogLevel.DANGER
-                    )
-                  )
-                }
-              }
-            },
-            modifier = Modifier.weight(1f)
-          ) {
-            Text("多参数一次性读取")
           }
 
           Button(
@@ -979,7 +973,7 @@ fun W50x(navController: NavHostController) {
           Button(
             enabled = option.isOpened,
             onClick = {
-              driver?.clearPriceTag(option.addr, tagId = option.code!!) { result ->
+              driver?.clearPriceTag(option.addr, code = option.code!!) { result ->
                 result.onSuccess { reply ->
                   logs.add(
                     LogEntry.new(
@@ -1019,7 +1013,7 @@ fun W50x(navController: NavHostController) {
 
                 driver?.setChineseDisplay(
                   option.addr,
-                  screenId = option.code!!,
+                  code = option.code!!,
                   row = rowNum,
                   text = rowText
                 ) { result ->
@@ -1041,7 +1035,7 @@ fun W50x(navController: NavHostController) {
                 }
                 // 如果并行请求太快，会导致部分文本没有写入
                 Thread.sleep(500)
-                idx++         // 别忘了递增索引
+                idx++
               }
             },
             modifier = Modifier.weight(1f)
@@ -1054,15 +1048,31 @@ fun W50x(navController: NavHostController) {
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-          Spacer(
+          Box(
             modifier = Modifier
-              .weight(2f, fill = true)
-              .height(0.dp)
-          )
+              .weight(1f)
+              .fillMaxWidth()
+          ) {
+            var text by remember { mutableStateOf("1234") }
+
+            OutlinedTextField(
+              value = text,
+              onValueChange = { text = it },      // ② 直接更新本地状态
+              label = { Text("文本内容") },   // ③ 输入框上方的 Label
+              singleLine = true,                  // 单行
+              modifier = Modifier.fillMaxWidth(),
+              enabled = false,
+            )
+          }
+
           Button(
             enabled = option.isOpened,
             onClick = {
-              driver?.setDigitalTubeDisplay(option.addr) { result ->
+              driver?.setDigitalTubeDisplay(
+                option.addr,
+                code = option.code!!,
+                content = "1234"
+              ) { result ->
                 result.onSuccess { reply ->
                   logs.add(
                     LogEntry.new(
@@ -1084,6 +1094,12 @@ fun W50x(navController: NavHostController) {
           ) {
             Text("数码管显示设置")
           }
+
+          Spacer(
+            modifier = Modifier
+              .weight(1f, fill = true)
+              .height(0.dp)
+          )
         }
 
       }

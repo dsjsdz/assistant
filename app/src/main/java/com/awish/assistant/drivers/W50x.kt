@@ -1096,7 +1096,7 @@ class W50x(private val modbusManager: ModbusManager) {
    * 调用结果通过回调返回 `Result` 对象，包含 [Unit] 类型的数据。
    *
    * @param addr 控制板地址
-   * @param tagId 价签编号
+   * @param code 价签编号
    * @param callback 回调函数，返回一个 [Result] 类型）
    * - 成功时包含 [Unit] 类型的数据
    * - 失败时包含异常信息
@@ -1110,11 +1110,11 @@ class W50x(private val modbusManager: ModbusManager) {
    * }`
    */
   fun clearPriceTag(
-    addr: Int = 1,
-    tagId: Int = 1,
+    addr: Int = 1, // 从机地址
+    code: Int = 1, // 货道编号
     callback: (Result<Unit>) -> Unit
   ) {
-    if (tagId !in 0..0xFFFF) {
+    if (code !in 0..0xFFFF) {
       callback(Result.failure(IllegalArgumentException("价签编号必须在 0~65535 范围内")))
       return
     }
@@ -1122,13 +1122,13 @@ class W50x(private val modbusManager: ModbusManager) {
     this.modbusManager.writeSingleRegister(
       addr,
       0x1008,
-      tagId,
+      code,
       object : ModbusCallback<WriteRegisterResponse> {
         override fun onSuccess(response: WriteRegisterResponse?) {
           if (response != null &&
             response.slaveId == addr &&
             response.writeOffset == 0x1008 &&
-            response.writeValue == tagId
+            response.writeValue == code
           ) {
             callback(Result.success(Unit))
           } else {
@@ -1152,7 +1152,7 @@ class W50x(private val modbusManager: ModbusManager) {
    * 调用结果通过回调返回 `Result` 对象，包含 [Unit] 类型的数据。
    *
    * @param addr 控制板地址
-   * @param screenId 数字屏编号
+   * @param code 数字屏编号
    * @param content 显示内容
    * @param callback 回调函数，返回一个 [Result] 类型）
    * - 成功时包含 [Unit] 类型的数据
@@ -1168,15 +1168,15 @@ class W50x(private val modbusManager: ModbusManager) {
    */
   fun setDigitalTubeDisplay(
     addr: Int = 1,
-    screenId: Int = 1,
-    content: String = "12345678",
+    code: Int = 1,
+    content: String = "1234",
     callback: (Result<Unit>) -> Unit
   ) {
     val data = mutableListOf<Byte>()
 
     // 屏编号（2字节）
-    data.add((screenId shr 8).toByte())
-    data.add((screenId and 0xFF).toByte())
+    data.add((code shr 8).toByte())
+    data.add((code and 0xFF).toByte())
 
     // 显示内容（最大8字节）
     val maxLength = 8
@@ -1221,12 +1221,13 @@ class W50x(private val modbusManager: ModbusManager) {
 
   /**
    * 设置汉字屏显示（异步）。
+   * 注意：不支持并行设置，可以控制延迟时间达到并行设置的效果。
    *
    * 该方法通过 Modbus 协议向驱动板发送写入命令，设置汉字屏显示。
    * 调用结果通过回调返回 `Result` 对象，包含 [Unit] 类型的数据。
    *
    * @param addr 控制板地址
-   * @param screenId 汉字屏编号
+   * @param code 汉字屏编号
    * @param bold true=加粗
    * @param reverse true=反显
    * @param row 起始行
@@ -1245,20 +1246,20 @@ class W50x(private val modbusManager: ModbusManager) {
    * }`
    */
   fun setChineseDisplay(
-    addr: Int = 1,
-    screenId: Int = 1,
-    bold: Boolean = false,
-    reverse: Boolean = false,
-    row: Int = 1,
-    column: Int = 1,
-    text: String = "你好",
+    addr: Int = 1, // 从机地址
+    code: Int = 1, // 货道编号
+    bold: Boolean = false, // 加粗
+    reverse: Boolean = false, // 反显
+    row: Int = 1, // 起始行
+    column: Int = 1, // 起始列
+    text: String = "你好", // 显示内容
     callback: (Result<Unit>) -> Unit
   ) {
     val data = mutableListOf<Byte>()
 
     // 屏编号（2字节）
-    data.add((screenId shr 8).toByte())
-    data.add((screenId and 0xFF).toByte())
+    data.add((code shr 8).toByte())
+    data.add((code and 0xFF).toByte())
 
     // 显示模式（加粗/反显/起始行列）
     data.add(if (bold) 1 else 0)
