@@ -2,3 +2,5 @@ storePassword=
 keyPassword=
 keyAlias=
 storeFile=upload-keystore.jks
+apolloAppid=
+apolloToken=

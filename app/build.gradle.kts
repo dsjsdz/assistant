@@ -14,6 +14,7 @@ plugins {
 
   id("com.google.dagger.hilt.android")
   kotlin("kapt")
+  id("com.apollographql.apollo") version "4.3.1"
 }
 
 android {
@@ -25,8 +26,8 @@ android {
     minSdk = 24
     @Suppress("OldTargetApi") // 保留你原有注释用途
     targetSdk = 34
-    versionCode = 4
-    versionName = "1.2.0"
+    versionCode = 5
+    versionName = "1.2.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -54,6 +55,7 @@ android {
 
   buildFeatures {
     compose = true
+    buildConfig = true
   }
 
   composeOptions {
@@ -67,6 +69,28 @@ android {
 
   kotlinOptions {
     jvmTarget = "11"
+  }
+}
+
+apollo {
+  service("service") {
+    srcDir("src/main/graphql")
+    packageName.set("com.awish.generated")
+
+    // https://www.apollographql.com/docs/kotlin/advanced/plugin-recipes#downloading-a-schema
+    introspection {
+      endpointUrl.set(keyProperties["apolloEndpoint"] as String?)
+      schemaFile.set(file("app/src/main/graphql/graphql.schema.graphqls"))
+
+      headers.putAll(
+        providers.provider {
+          mapOf(
+            "Authorization" to "Bearer ${keyProperties["apollpToken"] as String?}",
+            "Appid" to keyProperties["apollpAppid"] as String?
+          )
+        }
+      )
+    }
   }
 }
 
@@ -119,5 +143,13 @@ dependencies {
 
   // kotlin 协程
   implementation(libs.jetbrains.kotlinx.coroutines.android)
+
+  // [apollo](https://www.apollographql.com/docs/kotlin#contributing)
+  implementation(libs.apollo.runtime)
+  // Optional: if you want to use the normalized cache
+  implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:4.3.1")
+  // Optional: if you just want the generated models and parsers and write your own HTTP code/cache code, you can remove apollo-runtime
+  // and use apollo-api instead
+  implementation("com.apollographql.apollo:apollo-api:4.3.1")
 
 }

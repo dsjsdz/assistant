@@ -1,0 +1,355 @@
+mutation Login($input: String!) {
+  login(input: $input)
+}
+
+mutation Logout($input: String!) {
+  logout(input: $input)
+}
+
+mutation Signin($input: String!) {
+  signin(input: $input)
+}
+
+mutation CreateRole($input: RoleInput!) {
+  createRole(input: $input)
+}
+
+mutation UpdateRole($id: Int!, $input: RoleInput!) {
+  updateRole(id: $id, input: $input)
+}
+
+mutation DeleteRole($id: Int!) {
+  deleteRole(id: $id)
+}
+
+mutation CreatePermissionType($input: PermissionTypeInput!) {
+  createPermissionType(input: $input)
+}
+
+mutation UpdatePermissionType($id: Int!, $input: PermissionTypeInput!) {
+  updatePermissionType(id: $id, input: $input)
+}
+
+mutation DeletePermissionType($id: Int!) {
+  deletePermissionType(id: $id)
+}
+
+mutation CreatePermission($input: PermissionInput!) {
+  createPermission(input: $input)
+}
+
+mutation UpdatePermission($id: Int!, $input: PermissionInput!) {
+  updatePermission(id: $id, input: $input)
+}
+
+mutation DeletePermission($id: Int!) {
+  deletePermission(id: $id)
+}
+
+mutation CreateMenu($input: MenuInput!) {
+  createMenu(input: $input)
+}
+
+mutation UpdateMenu($id: Int!, $input: MenuInput!) {
+  updateMenu(id: $id, input: $input)
+}
+
+mutation DeleteMenu($id: Int!) {
+  deleteMenu(id: $id)
+}
+
+mutation CreateAccount($input: AccountInput!) {
+  createAccount(input: $input)
+}
+
+mutation UpdateAccount($id: Int!, $input: AccountInput!) {
+  updateAccount(id: $id, input: $input)
+}
+
+mutation DeleteAccount($id: Int!) {
+  deleteAccount(id: $id)
+}
+
+mutation CreateCurrency($input: CurrencyInput!) {
+  createCurrency(input: $input)
+}
+
+mutation UpdateCurrency($id: Int!, $input: CurrencyInput!) {
+  updateCurrency(id: $id, input: $input)
+}
+
+mutation DeleteCurrency($id: Int!) {
+  deleteCurrency(id: $id)
+}
+
+mutation CreateModel($input: ModelInput!) {
+  createModel(input: $input)
+}
+
+mutation UpdateModel($id: Int!, $input: ModelInput!) {
+  updateModel(id: $id, input: $input)
+}
+
+mutation DeleteModel($id: Int!) {
+  deleteModel(id: $id)
+}
+
+mutation CreateGood($input: GoodInput!) {
+  createGood(input: $input)
+}
+
+mutation UpdateGood($id: Int!, $input: GoodInput!) {
+  updateGood(id: $id, input: $input)
+}
+
+mutation DeleteGood($id: Int!) {
+  deleteGood(id: $id)
+}
+
+mutation CreateDriver($input: DriverInput!) {
+  createDriver(input: $input)
+}
+
+mutation UpdateDriver($id: Int!, $input: DriverInput!) {
+  updateDriver(id: $id, input: $input)
+}
+
+mutation DeleteDriver($id: Int!) {
+  deleteDriver(id: $id)
+}
+
+mutation CreateQuestion($input: QuestionInput!) {
+  createQuestion(input: $input)
+}
+
+mutation UpdateQuestion($id: Int!, $input: QuestionInput!) {
+  updateQuestion(id: $id, input: $input)
+}
+
+mutation DeleteQuestion($id: Int!) {
+  deleteQuestion(id: $id)
+}
+
+mutation CreateAlarmEvent($input: AlarmEventInput!) {
+  createAlarmEvent(input: $input)
+}
+
+mutation UpdateAlarmEvent($id: Int!, $input: AlarmEventInput!) {
+  updateAlarmEvent(id: $id, input: $input)
+}
+
+mutation DeleteAlarmEvent($id: Int!) {
+  deleteAlarmEvent(id: $id)
+}
+
+mutation CreateAlarmPlatform($input: AlarmPlatformInput!) {
+  createAlarmPlatform(input: $input)
+}
+
+mutation UpdateAlarmPlatform($id: Int!, $input: AlarmPlatformInput!) {
+  updateAlarmPlatform(id: $id, input: $input)
+}
+
+mutation DeleteAlarmPlatform($id: Int!) {
+  deleteAlarmPlatform(id: $id)
+}
+
+mutation CreateMerchant($input: MerchantInput!) {
+  createMerchant(input: $input)
+}
+
+mutation UpdateMerchant($id: Int!, $input: MerchantInput!) {
+  updateMerchant(id: $id, input: $input)
+}
+
+mutation DeleteMerchant($id: Int!) {
+  deleteMerchant(id: $id)
+}
+
+mutation UpdateRolePermissions($id: Int!, $input: [Int!]!) {
+  updateRolePermissions(id: $id, input: $input)
+}
+
+mutation UpdateRoleMenus($id: Int!, $input: RoleMenuObject!) {
+  updateRoleMenus(id: $id, input: $input)
+}
+
+mutation UpdateNotification($id: Int!) {
+  updateNotification(id: $id)
+}
+
+mutation DeleteNotification($id: Int!) {
+  deleteNotification(id: $id)
+}
+
+mutation CreateChannel($input: ChannelInput!) {
+  createChannel(input: $input)
+}
+
+mutation UpdateChannel($id: Int!, $input: ChannelInput!) {
+  updateChannel(id: $id, input: $input)
+}
+
+mutation DeleteChannel($id: Int!) {
+  deleteChannel(id: $id)
+}
+
+mutation CreateSetting($input: SettingInput!) {
+  createSetting(input: $input)
+}
+
+mutation UpdateSetting($id: Int!, $input: SettingInput!) {
+  updateSetting(id: $id, input: $input)
+}
+
+mutation DeleteSetting($id: Int!) {
+  deleteSetting(id: $id)
+}
+
+mutation CreateMachine($input: MachineInput!) {
+  createMachine(input: $input)
+}
+
+mutation UpdateMachine($id: Int!, $input: MachineInput!) {
+  updateMachine(id: $id, input: $input)
+}
+
+mutation DeleteMachine($id: Int!) {
+  deleteMachine(id: $id)
+}
+
+mutation CreateCategory($input: CategoryInput!) {
+  createCategory(input: $input)
+}
+
+mutation UpdateCategory($id: Int!, $input: CategoryInput!) {
+  updateCategory(id: $id, input: $input)
+}
+
+mutation DeleteCategory($id: Int!) {
+  deleteCategory(id: $id)
+}
+
+mutation DeleteMachineLog($id: Int!) {
+  deleteMachineLog(id: $id)
+}
+
+mutation CreateAnnouncement($input: AnnouncementInput!) {
+  createAnnouncement(input: $input)
+}
+
+mutation UpdateAnnouncement($id: Int!, $input: AnnouncementInput!) {
+  updateAnnouncement(id: $id, input: $input)
+}
+
+mutation DeleteAnnouncement($id: Int!) {
+  deleteAnnouncement(id: $id)
+}
+
+mutation CreateBanner($input: BannerInput!) {
+  createBanner(input: $input)
+}
+
+mutation UpdateBanner($id: Int!, $input: BannerInput!) {
+  updateBanner(id: $id, input: $input)
+}
+
+mutation DeleteBanner($id: Int!) {
+  deleteBanner(id: $id)
+}
+
+mutation RunShipment($id: Int!, $input: RunShipmentInput!) {
+  runShipment(id: $id, input: $input)
+}
+
+mutation UpdateUserRole($input: UserRoleInput!) {
+  updateUserRole(input: $input)
+}
+
+mutation CreateEmployee($input: EmployeeUserInput!) {
+  createEmployee(input: $input)
+}
+
+mutation UpdateEmployee($input: EmployeeUserInput!) {
+  updateEmployee(input: $input)
+}
+
+mutation DeleteEmployee($input: EmployeeUserInput!) {
+  deleteEmployee(input: $input)
+}
+
+mutation UpdateMerchantConfig($input: MerchantConfigInput!) {
+  updateMerchantConfig(input: $input)
+}
+
+mutation UpdateUserAlarmConfig($user_id: Int!, $input: UserAlarmConfigInput!) {
+  updateUserAlarmConfig(user_id: $user_id, input: $input)
+}
+
+mutation UpdateMerchantOwner($input: MerchantOwnerInput!) {
+  updateMerchantOwner(input: $input)
+}
+
+mutation CreateMerchantInvitationCode {
+  createMerchantInvitationCode
+}
+
+mutation UpdateProfile($input: UserProfileInput!) {
+  updateProfile(input: $input)
+}
+
+mutation CreateProduct($machine_id: Int!) {
+  createProduct(machine_id: $machine_id)
+}
+
+mutation UpdateProduct($id: Int!, $input: ProductInput!) {
+  updateProduct(id: $id, input: $input)
+}
+
+mutation DeleteProduct($machine_id: Int!, $ids: [Int!]!) {
+  deleteProduct(machine_id: $machine_id, ids: $ids)
+}
+
+mutation ReplenishProductInventory($machine_id: Int!, $ids: [Int!]!) {
+  replenishProductInventory(machine_id: $machine_id, ids: $ids)
+}
+
+mutation OnSaleProduct($machine_id: Int!, $ids: [Int!]!, $status: Boolean!) {
+  onSaleProduct(machine_id: $machine_id, ids: $ids, status: $status)
+}
+
+mutation WechatQrcodeToken($input: String!) {
+  wechatQrcodeToken(input: $input)
+}
+
+mutation CreatePromotion($input: PromotionInput!) {
+  createPromotion(input: $input)
+}
+
+mutation UpdatePromotion($id: Int!, $input: PromotionInput!) {
+  updatePromotion(id: $id, input: $input)
+}
+
+mutation DeletePromotion($id: Int!) {
+  deletePromotion(id: $id)
+}
+
+mutation ResetMerchantSecret($input: String!) {
+  resetMerchantSecret(input: $input)
+}
+
+mutation VerifyMerchantSecret($input: String!) {
+  verifyMerchantSecret(input: $input)
+}
+
+mutation CreateUnit($input: UnitInput!) {
+  createUnit(input: $input)
+}
+
+mutation UpdateUnit($id: Int!, $input: UnitInput!) {
+  updateUnit(id: $id, input: $input)
+}
+
+mutation DeleteUnit($id: Int!) {
+  deleteUnit(id: $id)
+}

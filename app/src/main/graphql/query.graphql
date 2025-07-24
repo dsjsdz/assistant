@@ -1,0 +1,1182 @@
+query Config($input: String) {
+  setting(input: $input) {
+    id
+    is_maintenance
+    registrable
+    resumed_at
+    token
+  }
+}
+
+query CanIUse($input: String!) {
+  canIUse(input: $input)
+}
+
+query Auth {
+  auth
+}
+
+query Profile {
+  profile {
+    id
+    email
+    username
+    profile_url
+    status
+    email_verified_at
+    permissions
+    merchant {
+      id
+      title
+      logo
+      verified_at
+      expired_at
+      machine_nos
+      is_dev
+      debug
+    }
+    role {
+      id
+      name
+      display_name
+    }
+  }
+}
+
+query Roles($input: String!, $filter: [String!]) {
+  roles(input: $filter) {
+    id
+    name
+    display_name
+    description
+    is_visible
+    sort_id
+    permission_ids
+    menu_ids {
+      selected_keys
+      indeterminate_keys
+    }
+  }
+  permissionTypes {
+    id
+    name
+    display_name
+    permissions {
+      id
+      name
+      display_name
+      is_visible
+      is_premium
+    }
+  }
+  menus(input: $input) {
+    id
+    name
+    display_name
+    children {
+      id
+      name
+      display_name
+      children {
+        id
+        name
+        display_name
+      }
+    }
+  }
+}
+
+query PermissionTypes {
+  permissionTypes {
+    id
+    name
+    display_name
+    sort_id
+    permissions {
+      id
+      name
+      display_name
+      description
+      is_visible
+      sort_id
+      type_id
+      is_premium
+    }
+  }
+}
+
+query Menus($input: String!) {
+  menus(input: $input) {
+    id
+    name
+    display_name
+    path
+    component
+    redirect
+    parent_id
+    sort_id
+    meta {
+      hidden
+      icon
+      title
+      affix
+      permissions
+      keep_alive
+    }
+    children {
+      id
+      name
+      display_name
+      path
+      component
+      redirect
+      parent_id
+      sort_id
+      meta {
+        hidden
+        icon
+        title
+        affix
+        permissions
+        keep_alive
+      }
+      children {
+        id
+        name
+        display_name
+        path
+        component
+        redirect
+        parent_id
+        sort_id
+        children {
+          id
+          name
+          display_name
+          path
+          component
+          redirect
+          parent_id
+          sort_id
+          meta {
+            hidden
+            icon
+            title
+            affix
+            permissions
+            keep_alive
+          }
+          children {
+            id
+            name
+            display_name
+            path
+            component
+            redirect
+            parent_id
+            sort_id
+          }
+        }
+        meta {
+          hidden
+          icon
+          title
+          affix
+          permissions
+          keep_alive
+        }
+      }
+    }
+  }
+}
+
+query Accounts {
+  accounts {
+    id
+    name
+    app
+    appid
+    app_secret
+    callback_url
+    platform_type
+  }
+  platformTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+}
+
+query Currencies {
+  currencies {
+    id
+    name
+    code
+    symbol
+  }
+}
+
+query Models($input: PageInput!) {
+  models(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      name
+      description
+      updated_at
+      total_channels
+      drivers {
+        is_dc
+        is_lp
+        floor_type
+        addr
+        driver_id
+        per_channel_capacity
+        total_channel_slots
+        lock_only
+      }
+    }
+  }
+  drivers {
+    id
+    name
+    description
+    thumb
+    is_visible
+    is_default
+    floor_type_values
+    connect_type_values
+    max_channel_slots
+  }
+  floorTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+}
+
+query Goods($input: PageInput!) {
+  goods(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      name
+      description
+      price
+      original_price
+      thumb
+      media
+      content
+      slug
+      updated_at
+      age_verification_enabled
+      age_verification_min
+      unit {
+        id
+        name
+        display_name
+        multiplier
+        base_unit
+        description
+      }
+      attributes {
+        id
+        label_name
+        label_value
+        immutable
+      }
+    }
+  }
+}
+
+query Good($id: Int!, $merchant_id: Int!) {
+  good(id: $id) {
+    id
+    name
+    description
+    price
+    original_price
+    thumb
+    media
+    content
+    slug
+    updated_at
+    age_verification_enabled
+    age_verification_min
+    unit {
+      id
+      name
+      display_name
+      multiplier
+      base_unit
+      description
+    }
+    attributes {
+      id
+      label_name
+      label_value
+      immutable
+    }
+  }
+  units(merchant_id: $merchant_id) {
+    id
+    name
+    display_name
+    multiplier
+    base_unit
+    description
+  }
+}
+
+query Drivers {
+  drivers {
+    id
+    name
+    description
+    thumb
+    is_visible
+    is_default
+    floor_type_values
+    connect_type_values
+    max_channel_slots
+  }
+  floorTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  connectTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+}
+
+query Questions($input: PageInput!) {
+  questions(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      title
+      keywords
+      description
+      thumb
+      content
+      is_visible
+      is_sticky
+      status
+      slug
+      author
+      sort_id
+      updated_at
+    }
+  }
+}
+
+query AlarmEvents {
+  alarmEvents {
+    id
+    name
+    description
+    sort_id
+    tag
+  }
+}
+
+query AlarmPlatforms {
+  alarmPlatforms {
+    id
+    name
+    description
+    sort_id
+    events {
+      id
+      name
+      description
+      sort_id
+      tag
+    }
+  }
+  alarmEvents {
+    id
+    name
+    description
+    sort_id
+    tag
+  }
+}
+
+query Merchants($input: PageInput!) {
+  merchants(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      title
+      keywords
+      description
+      logo
+      created_at
+      status
+      owner {
+        id
+        email
+        username
+        profile_url
+        is_owner
+        status
+        machine_ids
+        role_id
+      }
+    }
+  }
+}
+
+query Merchant($id: Int!, $filter: [String!]) {
+  merchant(id: $id) {
+    id
+    title
+    keywords
+    description
+    logo
+    created_at
+    expired_at
+    verified_at
+    status
+    config {
+      debug
+      is_dev
+      appid
+      app_secret
+      app_key
+      whitelist_ip
+      max_staff_count
+      current_staff_count
+      max_machine_count
+      current_machine_count
+      max_model_count
+      current_model_count
+      timezone
+    }
+    owner {
+      id
+      email
+      username
+      profile_url
+      is_owner
+      status
+      machine_ids
+      role_id
+      alarm_config {
+        id
+        alarm_platform_id
+        alarm_event_ids
+      }
+    }
+  }
+  roles(input: $filter) {
+    id
+    name
+    display_name
+    description
+  }
+}
+
+query GetMerchant($id: Int!) {
+  merchant(id: $id) {
+    id
+    title
+    keywords
+    description
+    logo
+    created_at
+    expired_at
+    verified_at
+    owner {
+      id
+      email
+      username
+      profile_url
+      is_owner
+    }
+  }
+}
+
+query MerchantInvitationCode($input: String!) {
+  merchantInvitationCode(input: $input) {
+    id
+    title
+    keywords
+    description
+    logo
+    created_at
+    verified_at
+    expired_at
+    status
+  }
+}
+
+query Employees($merchant_id: Int!, $input: PageInput!) {
+  employees(merchant_id: $merchant_id) {
+    id
+    email
+    username
+    profile_url
+    is_owner
+    status
+    machine_ids
+    role_id
+    alarm_config {
+      id
+      alarm_platform_id
+      alarm_event_ids
+    }
+  }
+  machines(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      name
+      cover_image
+      machine_no
+      address
+    }
+  }
+  alarmPlatforms {
+    id
+    name
+    description
+    sort_id
+    events {
+      id
+      name
+      description
+      sort_id
+      tag
+    }
+  }
+}
+
+query UserLogs($input: PageInput!) {
+  userLogs(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      login_at
+      logout_at
+      ip
+      city
+      country
+      login_type
+    }
+  }
+}
+
+query Question($id: Int!) {
+  question(id: $id) {
+    id
+    title
+    keywords
+    description
+    thumb
+    content
+    is_visible
+    is_sticky
+    status
+    slug
+    author
+    sort_id
+    updated_at
+  }
+}
+
+query Machines($input: PageInput!, $query: PageInput!) {
+  machines(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      name
+      client_id
+      imei
+      merchant_id
+      model_id
+      connect_type
+      machine_type
+      status
+      is_online
+      cover_image
+      sim_card
+      sim_rssi
+      media_type
+      contact
+      tel
+      lng_lat
+      address
+      qrcode
+      notify_message
+      device_state
+      temperature
+      humidity
+      machine_no
+      pickup_code_enabled
+      is_installed
+      install_version
+      install_password
+      transferable
+      currency_id
+    }
+  }
+  machineTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  floorTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  connectTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  models(input: $query) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      name
+      description
+      drivers {
+        is_dc
+        is_lp
+        floor_type
+        addr
+        driver_id
+        per_channel_capacity
+        total_channel_slots
+        lock_only
+      }
+    }
+  }
+}
+
+query Notifications($input: PageInput!) {
+  notifications(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      subject
+      notifiable_id
+      notifiable_type
+      content
+      read_at
+      status
+      created_at
+    }
+  }
+}
+
+query Channels($addr: Int, $model_id: Int!) {
+  channels(addr: $addr, model_id: $model_id) {
+    id
+    model_id
+    name
+    total
+    sort_id
+    motor_id
+    x
+    y
+    addr
+    is_auxiliary
+  }
+}
+
+query Setting {
+  setting {
+    id
+    is_maintenance
+    registrable
+    resumed_at
+    title
+    keywords
+    description
+    host
+    folder
+    mosquitto_jwt_secret
+  }
+}
+
+query ConnectTypes {
+  connectTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+}
+
+query Machine($id: Int!) {
+  machine(id: $id) {
+    id
+    name
+    client_id
+    imei
+    merchant_id
+    model_id
+    connect_type
+    machine_type
+    status
+    is_online
+    cover_image
+    sim_card
+    sim_rssi
+    media_type
+    contact
+    tel
+    lng_lat
+    address
+    qrcode
+    notify_message
+    device_state
+    temperature
+    humidity
+    machine_no
+    pickup_code_enabled
+    is_installed
+    install_version
+    install_password
+    transferable
+    currency_id
+    model {
+      id
+      name
+      description
+      drivers {
+        is_dc
+        is_lp
+        floor_type
+        addr
+        driver_id
+        per_channel_capacity
+        total_channel_slots
+        lock_only
+      }
+      has_lock_feature
+    }
+    free_purchase_enabled
+    purchase_limit
+    timezone
+  }
+  machineTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  floorTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  connectTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+  currencies {
+    id
+    name
+    code
+    symbol
+  }
+  categories(machine_id: $id) {
+    id
+    title
+    machine_id
+    sort_id
+    is_visible
+  }
+}
+
+query MachineLogs($machine_id: Int!, $input: PageInput!) {
+  machineLogs(machine_id: $machine_id, input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      machine_id
+      method
+      payload
+      pushed_at
+    }
+  }
+}
+
+query Announcement($machine_id: Int!) {
+  announcement(machine_id: $machine_id) {
+    id
+    machine_id
+    title
+    content
+    is_link
+    link_url
+    status
+    is_visible
+    created_at
+    expired_at
+  }
+}
+
+query Banners($machine_id: Int!) {
+  banners(machine_id: $machine_id) {
+    id
+    machine_id
+    status
+    is_visible
+    expired_at
+    is_link
+    link_url
+    is_video
+    video_url
+    cover_image
+    sort_id
+    hit_count
+    views_count
+    title
+    view_type
+  }
+}
+
+query MachineInstallPassword($id: Int!) {
+  machineInstallPassword(id: $id)
+}
+
+query Users($input: PageInput!, $filter: [String!]) {
+  users(input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      email
+      username
+      profile_url
+      status
+      email_verified_at
+      permissions
+      merchant {
+        id
+        title
+        logo
+        verified_at
+        expired_at
+        machine_nos
+      }
+      role {
+        id
+        name
+        display_name
+        description
+        is_visible
+        sort_id
+        permission_ids
+        menu_ids {
+          selected_keys
+          indeterminate_keys
+        }
+      }
+    }
+  }
+  roles(input: $filter) {
+    id
+    name
+    display_name
+    description
+    is_visible
+    sort_id
+    permission_ids
+    menu_ids {
+      selected_keys
+      indeterminate_keys
+    }
+  }
+}
+
+query Orders($input: PageInput!, $machine_id: Int) {
+  orders(input: $input, machine_id: $machine_id) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      user_id
+      date
+      transaction_id
+      trade_id
+      title
+      amount
+      bank_type
+      trade_type
+      ip
+      address
+      pay_time
+      status
+      machine_id
+      notify_url
+      notify_count
+      pickup_code_id
+      payment_id
+      merchant_id
+    }
+  }
+}
+
+query Order($id: Int!) {
+  order(id: $id) {
+    id
+    user_id
+    date
+    transaction_id
+    trade_id
+    title
+    amount
+    bank_type
+    trade_type
+    ip
+    address
+    pay_time
+    status
+    machine_id
+    notify_url
+    notify_count
+    pickup_code_id
+    payment_id
+    merchant_id
+    records {
+      id
+      product_id
+      quantity
+      price
+      delivered_at
+      status
+      notify_sent
+      pickup_at
+      delivery_id
+      fail_reason
+    }
+  }
+}
+
+query Products($input: String!) {
+  products(input: $input) {
+    id
+    machine_id
+    status
+    is_sticky
+    is_latest
+    sort_id
+    floor_status
+    lock_status
+    lock_id
+    current_inventory
+    inventory
+    channel {
+      id
+      model_id
+      name
+      total
+      sort_id
+      motor_id
+      x
+      y
+      addr
+    }
+    locker {
+      id
+      model_id
+      name
+      total
+      sort_id
+      motor_id
+      x
+      y
+      addr
+    }
+    category {
+      id
+      title
+      machine_id
+      sort_id
+      is_visible
+    }
+    good {
+      id
+      name
+      description
+      price
+      original_price
+      thumb
+      media
+      content
+      slug
+      updated_at
+      age_verification_enabled
+      age_verification_min
+      unit {
+        id
+        name
+        display_name
+        multiplier
+        base_unit
+        description
+        immutable
+      }
+      attributes {
+        id
+        label_name
+        label_value
+        immutable
+      }
+    }
+  }
+}
+
+query WechatLoginQrcode($input: String!) {
+  wechatLoginQrcode(input: $input) {
+    url
+    duration
+    key
+  }
+}
+
+query Restocks($machine_id: Int, $input: PageInput!) {
+  restocks(machine_id: $machine_id, input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      merchant_id
+      machine_id
+      user_id
+      addr
+      code
+      prev_inventory
+      current_inventory
+      description
+      transaction_type
+      platform_type
+      operator {
+        id
+        username
+      }
+      created_at
+    }
+  }
+}
+
+query ListMachines($input: PageInput!) {
+  machines(input: $input) {
+    data {
+      id
+      name
+      is_online
+    }
+  }
+}
+
+query PromotionTypes {
+  promotionTypes {
+    id
+    name
+    display_name
+    disabled
+  }
+}
+query Promotions($promotion_type: Int, $input: PageInput!) {
+  promotions(promotion_type: $promotion_type, input: $input) {
+    total
+    currentPage
+    perPage
+    lastPage
+    data {
+      id
+      promotion_type
+      title
+      hit_count
+      views_count
+      thumb
+      is_link
+      link_url
+    }
+  }
+}
+
+query Lockers($machine_id: Int!, $addr: Int) {
+  lockers(machine_id: $machine_id, addr: $addr) {
+    id
+    model_id
+    name
+    total
+    sort_id
+    motor_id
+    x
+    y
+    addr
+    is_auxiliary
+    is_used
+  }
+}
+
+query Units($merchant_id: Int!) {
+  units(merchant_id: $merchant_id) {
+    id
+    name
+    display_name
+    multiplier
+    base_unit
+    description
+    immutable
+  }
+}

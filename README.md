@@ -31,3 +31,11 @@ lifecycleScope.launch {
     }
 }
 ```
+
+## Apollo
+
+```bash
+./gradlew downloadApolloSchema --endpoint="{endpoint}" --schema="app/src/main/graphql/graphql.schema.graphqls" --header="Appid: {appid}" --header="Authorization: Bearer {token}"
+
+./gradlew :app:generateServiceApolloSources
+```
